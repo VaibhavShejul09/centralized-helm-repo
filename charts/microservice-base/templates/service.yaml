@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.name }}
+  labels:
+    app: {{ .Values.name }}
+spec:
+  selector:
+    app: {{ .Values.name }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.port }}
+  {{- if eq .Values.kind "StatefulSet" }}
+  clusterIP: None   # headless service only for StatefulSet
+  {{- else }}
+  type: {{ .Values.service.type | default "ClusterIP" }}
+  {{- end }}
+
