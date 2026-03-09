@@ -5,6 +5,10 @@ metadata:
   name: {{ .Values.name }}-deploy
   labels:
     app: {{ .Values.name }}
+  {{- if .Values.syncWave }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.syncWave }}"
+  {{- end }}  
 spec:
   replicas: {{ .Values.replicaCount | default 1 }}
   selector:
