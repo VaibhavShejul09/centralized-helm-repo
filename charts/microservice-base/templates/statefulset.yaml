@@ -38,7 +38,7 @@ spec:
         {{- end }}
 
         {{- with .Values.resources }}
-                resources:
+        resources:
         {{ toYaml . | nindent 10 }}
         {{- end }}
 
@@ -71,14 +71,14 @@ spec:
         {{- with .Values.startupProbe }}
         startupProbe:
           exec:
-            command: {{- toYaml .exec | nindent 12 }}
+            command: {{ toYaml .exec | nindent 12 }}
           periodSeconds: {{ .periodSeconds | default 10 }}
           failureThreshold: {{ .failureThreshold | default 30 }}
         {{- end }}
 
         livenessProbe:
           exec:
-            command: {{- toYaml .Values.livenessProbe.exec | nindent 12 }}
+            command: {{ toYaml .Values.livenessProbe.exec | nindent 12 }}
           initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
           periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds | default 5 }}
@@ -86,7 +86,7 @@ spec:
 
         readinessProbe:
           exec:
-            command: {{- toYaml .Values.readinessProbe.exec | nindent 12 }}
+            command: {{ toYaml .Values.readinessProbe.exec | nindent 12 }}
           initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
           periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
           timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds | default 5 }}
