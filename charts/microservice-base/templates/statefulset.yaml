@@ -19,15 +19,27 @@ spec:
       labels:
         app: {{ .Values.name }}
     spec:
+
+
+      {{- with .Values.securityContext.pod }}
+      securityContext:
+      {{ toYaml . | nindent 8 }}
+      {{- end }}
+
       containers:
       - name: {{ .Values.name }}-container
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         ports:
         - containerPort: {{ .Values.service.port }}
 
+        {{- with .Values.securityContext.container }}
+        securityContext:
+        {{ toYaml . | nindent 10 }}
+        {{- end }}
+
         {{- with .Values.resources }}
-        resources:
-      {{ toYaml . | nindent 10 }}
+                resources:
+        {{ toYaml . | nindent 10 }}
         {{- end }}
 
         env:
@@ -51,6 +63,14 @@ spec:
         volumeMounts:
         - name: {{ .Values.persistence.name | default "mysql-data" }}
           mountPath: {{ .Values.persistence.mountPath | default "/var/lib/mysql" }}
+        {{- end }}
+
+        {{- with .Values.startupProbe }}
+        startupProbe:
+          exec:
+            command: {{- toYaml .exec | nindent 12 }}
+          periodSeconds: {{ .periodSeconds | default 10 }}
+          failureThreshold: {{ .failureThreshold | default 30 }}
         {{- end }}
 
         livenessProbe:

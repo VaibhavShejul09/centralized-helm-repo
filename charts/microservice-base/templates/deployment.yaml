@@ -30,6 +30,11 @@ spec:
 {{ toYaml . | nindent 8 }}
       {{- end }}
 
+      {{- with .Values.securityContext.pod }}
+      securityContext:
+      {{ toYaml . | nindent 8 }}
+      {{- end }}
+
       containers:
         - name: {{ .Values.name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -37,6 +42,11 @@ spec:
 
           ports:
             - containerPort: {{ .Values.service.port }}
+
+          {{- with .Values.securityContext.container }}
+          securityContext:
+          {{ toYaml . | nindent 12 }}
+          {{- end }}  
 
           {{- if or .Values.config .Values.secret }}
           envFrom:
@@ -70,6 +80,17 @@ spec:
             periodSeconds: {{ .periodSeconds | default 5 }}
             timeoutSeconds: {{ .timeoutSeconds | default 1 }}
             failureThreshold: {{ .failureThreshold | default 3 }}
+          {{- end }}
+
+          {{- with .Values.startupProbe }}
+          startupProbe:
+            httpGet:
+              path: {{ .path }}
+              port: {{ $.Values.service.port }}
+            initialDelaySeconds: {{ .initialDelaySeconds | default 0 }}
+            periodSeconds: {{ .periodSeconds | default 5 }}
+            timeoutSeconds: {{ .timeoutSeconds | default 1 }}
+            failureThreshold: {{ .failureThreshold | default 30 }}
           {{- end }}
 
           {{- with .Values.resources }}
