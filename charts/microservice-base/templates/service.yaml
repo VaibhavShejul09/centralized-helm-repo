@@ -3,10 +3,10 @@ kind: Service
 metadata:
   name: {{ .Values.name }}
   labels:
-    app: {{ .Values.name }}
+{{ include "microservice.labels" . | nindent 4 }}
 spec:
   selector:
-    app: {{ .Values.name }}
+    app.kubernetes.io/name: {{ .Values.name | quote }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.port }}

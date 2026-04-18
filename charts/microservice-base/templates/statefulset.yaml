@@ -4,7 +4,12 @@ kind: StatefulSet
 metadata:
   name: {{ .Values.name }}
   labels:
-    app: {{ .Values.name }}
+{{ include "microservice.labels" . | nindent 4 }}
+
+  {{- if .Values.syncWave }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ .Values.syncWave }}"
+  {{- end }}
 
 spec:
   serviceName: {{ .Values.serviceName | default .Values.name }}
@@ -12,12 +17,12 @@ spec:
 
   selector:
     matchLabels:
-      app: {{ .Values.name }}
+      app.kubernetes.io/name: {{ .Values.name | quote }}
 
   template:
     metadata:
       labels:
-        app: {{ .Values.name }}
+{{ include "microservice.labels" . | nindent 8 }}
     spec:
 
 
@@ -96,6 +101,8 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: {{ .Values.persistence.name | default "mysql-data" }}
+      labels:
+  {{ include "microservice.labels" . | nindent 6 }}    
     spec:
       accessModes:
         - ReadWriteOnce

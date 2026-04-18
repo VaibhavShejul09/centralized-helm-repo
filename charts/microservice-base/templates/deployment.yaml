@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: {{ .Values.name }}-deploy
   labels:
-    app: {{ .Values.name }}
+{{ include "microservice.labels" . | nindent 4 }}
   {{- if .Values.syncWave }}
   annotations:
     argocd.argoproj.io/sync-wave: "{{ .Values.syncWave }}"
@@ -13,11 +13,11 @@ spec:
   replicas: {{ .Values.replicaCount | default 1 }}
   selector:
     matchLabels:
-      app: {{ .Values.name }}
+      app.kubernetes.io/name: {{ .Values.name | quote }}
   template:
     metadata:
       labels:
-        app: {{ .Values.name }}
+{{ include "microservice.labels" . | nindent 8 }}
     spec:
 
       {{- with .Values.imagePullSecrets }}
