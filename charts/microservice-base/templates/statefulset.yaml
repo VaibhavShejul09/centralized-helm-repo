@@ -102,7 +102,7 @@ spec:
   - metadata:
       name: {{ .Values.persistence.name | default "mysql-data" }}
       labels:
-  {{ include "microservice.labels" . | nindent 6 }}    
+  {{ include "microservice.labels" . | nindent 8 }}    
     spec:
       accessModes:
         - ReadWriteOnce
