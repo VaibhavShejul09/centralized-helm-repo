@@ -1,0 +1,42 @@
+{{- if .Values.services.discovery.enabled }}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: allow-services-to-discovery-server
+  namespace: {{ include "rankx.namespace" . }}
+
+  labels:
+    {{- include "rankx.networkpolicy.labels" . | nindent 4 }}
+
+spec:
+  # Apply policy only to discovery-server pods
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: discovery
+      tier: infra
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+
+        # Allow backend application pods
+        - podSelector:
+            matchLabels:
+              tier: app
+              app.kubernetes.io/component: backend
+
+        # Allow API Gateway
+        - podSelector:
+            matchLabels:
+              tier: edge
+              app.kubernetes.io/component: gateway
+
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.discovery.port }}
+
+{{- end }}

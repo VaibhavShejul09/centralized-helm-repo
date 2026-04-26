@@ -1,0 +1,91 @@
+{{- if .Values.redis.enabled }}
+
+apiVersion: apps/v1
+kind: StatefulSet
+
+metadata:
+  name: redis
+
+  labels:
+    {{- include "rankx.redis.labels" . | nindent 4 }}
+
+spec:
+  serviceName: redis
+  replicas: {{ .Values.redis.replicaCount }}
+
+  selector:
+    matchLabels:
+      {{- include "rankx.redis.selectorLabels" . | nindent 6 }}
+
+  template:
+    metadata:
+      labels:
+        {{- include "rankx.redis.labels" . | nindent 8 }}
+
+    spec:
+      securityContext:
+        fsGroup: 1001
+
+      containers:
+        - name: redis
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: TCP
+
+          args:
+            - "--appendonly"
+            - "yes"
+
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+
+          livenessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+
+          readinessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          volumeMounts:
+            {{- if .Values.persistence.enabled }}
+            - name: redis-data
+              mountPath: /data
+            {{- end }}
+
+  {{- if .Values.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+
+      spec:
+        accessModes:
+          - ReadWriteOnce
+
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}
+
+        {{- if .Values.persistence.storageClass }}
+        storageClassName: {{ .Values.persistence.storageClass }}
+        {{- end }}
+  {{- end }}
+
+{{- end }}

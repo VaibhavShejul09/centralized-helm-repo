@@ -1,0 +1,41 @@
+# ===================================================
+# Allow submission-service -> submission mysql database
+# Render only if submission-service + submission-db enabled
+# ===================================================
+{{- if and .Values.services.submission.enabled .Values.database.submission.enabled }}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: submission-to-mysql
+  namespace: {{ include "rankx.namespace" . }}
+
+  labels:
+    {{- include "rankx.networkpolicy.labels" . | nindent 4 }}
+
+spec:
+  # Apply policy only to submission database pods
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mysql-submission-service
+      tier: data
+      app.kubernetes.io/component: db
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+        # Only submission-service may connect
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: submission-service
+              tier: app
+              app.kubernetes.io/component: backend
+
+      ports:
+        - protocol: TCP
+          port: {{ .Values.database.submission.port }}
+
+{{- end }}

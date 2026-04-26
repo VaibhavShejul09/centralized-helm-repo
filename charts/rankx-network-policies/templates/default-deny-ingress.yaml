@@ -1,0 +1,30 @@
+{{- if .Values.policies.defaultDenyIngress }}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  # Name of the policy object
+  name: default-deny-ingress
+
+  # Namespace comes from values.yaml (dev / qa / prod)
+  namespace: {{ include "rankx.namespace" . }}
+
+  labels:
+    {{- include "rankx.networkpolicy.labels" . | nindent 4 }}
+
+spec:
+  # Select ALL pods in this namespace
+  # Empty selector = every pod
+  podSelector: {}
+
+  # This policy controls only incoming traffic
+  policyTypes:
+    - Ingress
+
+  # No ingress rules defined intentionally.
+  # Meaning:
+  # Deny all incoming traffic to selected pods
+  ingress: []
+
+{{- end }}

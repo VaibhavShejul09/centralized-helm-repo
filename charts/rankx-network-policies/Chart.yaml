@@ -1,0 +1,6 @@
+apiVersion: v2
+name: rankx-network-policies
+description: Reusable Kubernetes NetworkPolicies for RankX
+type: application
+version: 1.0.0
+appVersion: "1.0"

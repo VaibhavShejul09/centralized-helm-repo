@@ -1,0 +1,117 @@
+# ===================================================
+# Allow API Gateway -> auth-service
+# Render only if gateway + auth-service enabled
+# ===================================================
+{{- if and .Values.gateway.enabled .Values.services.auth.enabled }}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: gateway-to-auth-service
+  namespace: {{ include "rankx.namespace" . }}
+
+  labels:
+    {{- include "rankx.networkpolicy.labels" . | nindent 4 }}
+
+spec:
+  # Apply to auth-service pods only
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: auth-service
+      tier: app
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+        # Only API Gateway may access auth-service
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: gateway
+              tier: edge
+
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.auth.port }}
+
+{{- end }}
+
+---
+# ===================================================
+# Allow API Gateway -> problem-service
+# Render only if gateway + problem-service enabled
+# ===================================================
+{{- if and .Values.gateway.enabled .Values.services.problem.enabled }}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: gateway-to-problem-service
+  namespace: {{ include "rankx.namespace" . }}
+
+  labels:
+    {{- include "rankx.networkpolicy.labels" . | nindent 4 }}
+
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: problem-service
+      tier: app
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: gateway
+              tier: edge
+
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.problem.port }}
+
+{{- end }}
+
+---
+# ===================================================
+# Allow API Gateway -> submission-service
+# Render only if gateway + submission-service enabled
+# ===================================================
+{{- if and .Values.gateway.enabled .Values.services.submission.enabled }}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: gateway-to-submission-service
+  namespace: {{ include "rankx.namespace" . }}
+
+  labels:
+    {{- include "rankx.networkpolicy.labels" . | nindent 4 }}
+
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: submission-service
+      tier: app
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: gateway
+              tier: edge
+
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.submission.port }}
+
+{{- end }}

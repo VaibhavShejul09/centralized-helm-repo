@@ -1,0 +1,37 @@
+{{- if and .Values.services.auth.enabled .Values.redis.enabled }}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: auth-to-redis
+  namespace: {{ include "rankx.namespace" . }}
+
+  labels:
+    {{- include "rankx.networkpolicy.labels" . | nindent 4 }}
+
+spec:
+  # Apply only to Redis pods
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: redis
+      app.kubernetes.io/component: cache
+      tier: data
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+        # Only auth-service pods may connect
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: auth-service
+              app.kubernetes.io/component: backend
+              tier: app
+
+      ports:
+        - protocol: TCP
+          port: {{ .Values.redis.port }}
+
+{{- end }}
