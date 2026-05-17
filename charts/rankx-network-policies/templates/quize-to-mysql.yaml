@@ -1,0 +1,41 @@
+# ===================================================
+# Allow quize-service -> quize mysql database
+# Render only if quize-service + quize-db enabled
+# ===================================================
+{{- if and .Values.services.quize.enabled .Values.database.quize.enabled }}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: quize-to-mysql
+  namespace: {{ include "rankx.namespace" . }}
+
+  labels:
+    {{- include "rankx.networkpolicy.labels" . | nindent 4 }}
+
+spec:
+  # Apply policy to quize database pods only
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mysql-quize-service
+      tier: data
+      app.kubernetes.io/component: db
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+        # Only quize-service pods may connect
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: quize-service
+              tier: app
+              app.kubernetes.io/component: backend
+
+      ports:
+        - protocol: TCP
+          port: {{ .Values.database.quize.port }}
+
+{{- end }}

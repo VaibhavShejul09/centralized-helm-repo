@@ -1,0 +1,36 @@
+{{- if and .Values.frontendadmin.enabled .Values.gateway.enabled }}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: allow-frontendadmin-to-gateway
+  namespace: {{ include "rankx.namespace" . }}
+
+  labels:
+    {{- include "rankx.networkpolicy.labels" . | nindent 4 }}
+
+spec:
+  # Apply policy to API Gateway pods only
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: gateway
+      tier: edge
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+
+        # Allow only frontend pods
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: frontendadmin
+              tier: edge
+
+      ports:
+        - protocol: TCP
+          port: {{ .Values.gateway.port }}
+
+{{- end }}

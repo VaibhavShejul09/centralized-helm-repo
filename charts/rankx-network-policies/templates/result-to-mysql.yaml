@@ -1,0 +1,41 @@
+# ===================================================
+# Allow result-service -> quize result database
+# Render only if result-service + result-db enabled
+# ===================================================
+{{- if and .Values.services.result.enabled .Values.database.result.enabled }}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: result-to-mysql
+  namespace: {{ include "rankx.namespace" . }}
+
+  labels:
+    {{- include "rankx.networkpolicy.labels" . | nindent 4 }}
+
+spec:
+  # Apply policy to result database pods only
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mysql-result-service
+      tier: data
+      app.kubernetes.io/component: db
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+        # Only result-service pods may connect
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: result-service
+              tier: app
+              app.kubernetes.io/component: backend
+
+      ports:
+        - protocol: TCP
+          port: {{ .Values.database.result.port }}
+
+{{- end }}

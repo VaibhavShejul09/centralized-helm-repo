@@ -1,0 +1,41 @@
+# ===================================================
+# Allow question-service -> question mysql database
+# Render only if question-service + question-db enabled
+# ===================================================
+{{- if and .Values.services.question.enabled .Values.database.question.enabled }}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: question-to-mysql
+  namespace: {{ include "rankx.namespace" . }}
+
+  labels:
+    {{- include "rankx.networkpolicy.labels" . | nindent 4 }}
+
+spec:
+  # Apply policy to question database pods only
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mysql-question-service
+      tier: data
+      app.kubernetes.io/component: db
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+        # Only question-service pods may connect
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: question-service
+              tier: app
+              app.kubernetes.io/component: backend
+
+      ports:
+        - protocol: TCP
+          port: {{ .Values.database.question.port }}
+
+{{- end }}

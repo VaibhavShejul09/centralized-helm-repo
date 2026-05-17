@@ -115,3 +115,203 @@ spec:
           port: {{ .Values.services.submission.port }}
 
 {{- end }}
+
+
+---
+# ===================================================
+# Allow API Gateway -> attempt-service
+# Render only if gateway + attempt-service enabled
+# ===================================================
+{{- if and .Values.gateway.enabled .Values.services.attempt.enabled }}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: gateway-to-attempt-service
+  namespace: {{ include "rankx.namespace" . }}
+
+  labels:
+    {{- include "rankx.networkpolicy.labels" . | nindent 4 }}
+
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: attempt-service
+      tier: app
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: gateway
+              tier: edge
+
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.attempt.port }}
+
+{{- end }}
+
+
+---
+# ===================================================
+# Allow API Gateway -> question-service
+# Render only if gateway + question-service enabled
+# ===================================================
+{{- if and .Values.gateway.enabled .Values.services.question.enabled }}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: gateway-to-question-service
+  namespace: {{ include "rankx.namespace" . }}
+
+  labels:
+    {{- include "rankx.networkpolicy.labels" . | nindent 4 }}
+
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: question-service
+      tier: app
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: gateway
+              tier: edge
+
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.question.port }}
+
+{{- end }}
+
+
+---
+# ===================================================
+# Allow API Gateway -> quize-service
+# Render only if gateway + quize-service enabled
+# ===================================================
+{{- if and .Values.gateway.enabled .Values.services.quize.enabled }}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: gateway-to-quize-service
+  namespace: {{ include "rankx.namespace" . }}
+
+  labels:
+    {{- include "rankx.networkpolicy.labels" . | nindent 4 }}
+
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: quize-service
+      tier: app
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: gateway
+              tier: edge
+
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.quize.port }}
+
+{{- end }}
+
+
+---
+# ===================================================
+# Allow API Gateway -> result-service
+# Render only if gateway + result-service enabled
+# ===================================================
+{{- if and .Values.gateway.enabled .Values.services.result.enabled }}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: gateway-to-result-service
+  namespace: {{ include "rankx.namespace" . }}
+
+  labels:
+    {{- include "rankx.networkpolicy.labels" . | nindent 4 }}
+
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: result-service
+      tier: app
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: gateway
+              tier: edge
+
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.result.port }}
+
+{{- end }}
+
+
+---
+# ===================================================
+# Allow API Gateway -> user-service
+# Render only if gateway + user-service enabled
+# ===================================================
+{{- if and .Values.gateway.enabled .Values.services.user.enabled }}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: gateway-to-user-service
+  namespace: {{ include "rankx.namespace" . }}
+
+  labels:
+    {{- include "rankx.networkpolicy.labels" . | nindent 4 }}
+
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: user-service
+      tier: app
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: gateway
+              tier: edge
+
+      ports:
+        - protocol: TCP
+          port: {{ .Values.services.user.port }}
+
+{{- end }}

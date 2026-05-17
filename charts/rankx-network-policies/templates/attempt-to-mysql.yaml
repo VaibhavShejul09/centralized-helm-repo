@@ -1,0 +1,41 @@
+# ===================================================
+# Allow attempt-service -> attempt mysql database
+# Render only if attempt-service + attempt-db enabled
+# ===================================================
+{{- if and .Values.services.attempt.enabled .Values.database.attempt.enabled }}
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: attempt-to-mysql
+  namespace: {{ include "rankx.namespace" . }}
+
+  labels:
+    {{- include "rankx.networkpolicy.labels" . | nindent 4 }}
+
+spec:
+  # Apply policy to attempt database pods only
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mysql-attempt-service
+      tier: data
+      app.kubernetes.io/component: db
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+        # Only attempt-service pods may connect
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: attempt-service
+              tier: app
+              app.kubernetes.io/component: backend
+
+      ports:
+        - protocol: TCP
+          port: {{ .Values.database.attempt.port }}
+
+{{- end }}
